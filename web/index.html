@@ -1,0 +1,366 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkForge – URL Shortener Dashboard</title>
+  <meta name="description" content="LinkForge is a simple URL shortener dashboard. Create short links, view all links, and check click analytics." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    header {
+      border-bottom: 2px solid #1a1a1a;
+      padding: 32px 0 20px;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #d0d0c8;
+      border-radius: 4px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8e8e0;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    label .optional {
+      font-weight: normal;
+      color: #888;
+      font-size: 0.8rem;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="number"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #bbb;
+      border-radius: 3px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #fafaf8;
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #1a1a1a;
+      background: #fff;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .btn-primary:hover { background: #333; }
+
+    .btn-secondary {
+      background: #fff;
+      color: #1a1a1a;
+      border-color: #aaa;
+      font-size: 0.8rem;
+      padding: 5px 12px;
+    }
+    .btn-secondary:hover { background: #f0f0ea; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .msg {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    .msg-success { background: #edf7ed; border: 1px solid #b2d8b2; color: #2a6a2a; }
+    .msg-error   { background: #fdecea; border: 1px solid #f0b0a8; color: #8b1a1a; }
+    .msg a { color: inherit; font-weight: bold; }
+    .msg-loading { color: #666; font-style: italic; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid #1a1a1a;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #444;
+    }
+
+    td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #e8e8e0;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafaf8; }
+
+    .url-cell {
+      max-width: 240px;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+    .url-cell a { color: #1a1a1a; }
+
+    .analytics-result {
+      margin-top: 5px;
+      font-size: 0.82rem;
+      color: #444;
+      font-style: italic;
+    }
+
+    .empty-text { color: #888; font-style: italic; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>LinkForge</h1>
+      <p>Simple URL Shortener Dashboard</p>
+    </header>
+
+    <div class="card">
+      <h2>Create Short URL</h2>
+      <form id="shorten-form">
+        <div class="form-group">
+          <label for="original-url">Original URL</label>
+          <input type="url" id="original-url" placeholder="https://example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="custom-slug">Custom Slug <span class="optional">(optional)</span></label>
+          <input type="text" id="custom-slug" placeholder="my-link" />
+        </div>
+        <div class="form-group">
+          <label for="expiry-hours">Expiry Hours <span class="optional">(optional)</span></label>
+          <input type="number" id="expiry-hours" placeholder="24" min="1" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="create-btn">Create Short URL</button>
+      </form>
+      <div id="create-result"></div>
+    </div>
+
+    <div class="card">
+      <h2>Your Links</h2>
+      <div id="links-container">
+        <p class="msg-loading">Loading links...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Change this if the backend runs on a different port.
+    // When served by Fiber as a static file, leave it empty so paths are relative.
+    const API_BASE_URL = "";
+
+    function formatDate(isoString) {
+      if (!isoString) return "Never";
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "Invalid date";
+      return d.toLocaleString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
+    }
+
+    function showSuccess(container, html) {
+      container.innerHTML = '<div class="msg msg-success">' + html + '</div>';
+    }
+
+    function showError(container, text) {
+      container.innerHTML = '<div class="msg msg-error">' + text + '</div>';
+    }
+
+    async function createShortURL(event) {
+      event.preventDefault();
+
+      const urlInput    = document.getElementById("original-url");
+      const slugInput   = document.getElementById("custom-slug");
+      const expiryInput = document.getElementById("expiry-hours");
+      const createBtn   = document.getElementById("create-btn");
+      const resultDiv   = document.getElementById("create-result");
+
+      const body = { url: urlInput.value.trim() };
+      if (slugInput.value.trim())   body.custom_slug  = slugInput.value.trim();
+      if (expiryInput.value.trim()) body.expiry_hours = parseInt(expiryInput.value, 10);
+
+      createBtn.disabled    = true;
+      createBtn.textContent = "Creating...";
+      resultDiv.innerHTML   = "";
+
+      try {
+        const response = await fetch(API_BASE_URL + "/shorten", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(resultDiv, data.error || "Failed to create short URL.");
+          return;
+        }
+
+        showSuccess(
+          resultDiv,
+          'Short URL created: <a href="' + data.short_url + '" target="_blank" rel="noopener">' + data.short_url + '</a>'
+        );
+
+        urlInput.value    = "";
+        slugInput.value   = "";
+        expiryInput.value = "";
+
+        loadLinks();
+
+      } catch (err) {
+        console.error("Create short URL error:", err);
+        showError(resultDiv, "Could not reach the server. Is the backend running?");
+      } finally {
+        createBtn.disabled    = false;
+        createBtn.textContent = "Create Short URL";
+      }
+    }
+
+    async function loadAnalytics(slug) {
+      const cell = document.getElementById("analytics-" + slug);
+      if (!cell) return;
+
+      const resultSpan = cell.querySelector(".analytics-result");
+      resultSpan.textContent = "Loading analytics...";
+
+      try {
+        const response = await fetch(API_BASE_URL + "/analytics/" + encodeURIComponent(slug));
+        const data     = await response.json();
+
+        if (!response.ok) {
+          resultSpan.textContent = "Error loading analytics.";
+          return;
+        }
+
+        resultSpan.textContent = "Clicks: " + data.clicks;
+
+      } catch (err) {
+        console.error("Analytics error:", err);
+        resultSpan.textContent = "Server unreachable.";
+      }
+    }
+
+    function renderLinks(links) {
+      const container = document.getElementById("links-container");
+
+      if (!links || links.length === 0) {
+        container.innerHTML = '<p class="empty-text">No links yet. Create one above.</p>';
+        return;
+      }
+
+      var rows = links.map(function(link) {
+        var slug        = link.Slug;
+        var originalURL = link.OriginalURL;
+        var createdAt   = formatDate(link.CreatedAt);
+        var expiresAt   = formatDate(link.ExpiresAt);
+
+        return '<tr>' +
+          '<td>' + slug + '</td>' +
+          '<td class="url-cell"><a href="' + originalURL + '" target="_blank" rel="noopener">' + originalURL + '</a></td>' +
+          '<td>' + createdAt + '</td>' +
+          '<td>' + expiresAt + '</td>' +
+          '<td id="analytics-' + slug + '">' +
+            '<button class="btn btn-secondary" onclick="loadAnalytics(\'' + slug + '\')">Analytics</button>' +
+            '<div class="analytics-result"></div>' +
+          '</td>' +
+        '</tr>';
+      });
+
+      container.innerHTML =
+        '<div class="table-wrap">' +
+          '<table>' +
+            '<thead><tr>' +
+              '<th>Slug</th><th>Original URL</th><th>Created</th><th>Expires</th><th>Analytics</th>' +
+            '</tr></thead>' +
+            '<tbody>' + rows.join("") + '</tbody>' +
+          '</table>' +
+        '</div>';
+    }
+
+    async function loadLinks() {
+      const container = document.getElementById("links-container");
+      container.innerHTML = '<p class="msg-loading">Loading links...</p>';
+
+      try {
+        const response = await fetch(API_BASE_URL + "/links");
+
+        if (!response.ok) {
+          showError(container, "Failed to load links from the server.");
+          return;
+        }
+
+        const links = await response.json();
+        renderLinks(links);
+
+      } catch (err) {
+        console.error("Load links error:", err);
+        showError(container, "Could not reach the server. Is the backend running?");
+      }
+    }
+
+    document.getElementById("shorten-form").addEventListener("submit", createShortURL);
+
+    loadLinks();
+  </script>
+</body>
+</html>

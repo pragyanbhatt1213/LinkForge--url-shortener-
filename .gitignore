@@ -1,0 +1,41 @@
+# -- Environment & Secrets -----------------------------------------------------
+.env
+.env.local
+.env.*.local
+
+# -- Go build artefacts --------------------------------------------------------
+/linkforge-url-shortener
+/linkforge-url-shortener.exe
+/bin/
+*.exe
+*.out
+*.test
+
+# -- Personal / local-only notes -----------------------------------------------
+docs/interview-notes.md
+web/INTERVIEW_NOTES.md
+
+# -- IDE & editor files --------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# -- OS-generated files --------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -- Go test & coverage artefacts ---------------------------------------------
+coverage.out
+coverage.html
+*.prof
+
+# -- Docker volumes (local dev data) ------------------------------------------
+postgres_data/
+grafana_data/
+
+# -- k6 result files -----------------------------------------------------------
+*.json.gz
+summary.json
